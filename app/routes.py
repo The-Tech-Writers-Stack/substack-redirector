@@ -1,10 +1,9 @@
-from flask import Flask, render_template
-import requests
+from typing import Tuple, List
 from bs4 import BeautifulSoup
-from tenacity import retry, wait_random_exponential, stop_after_attempt
+from flask import Flask, render_template
 from markupsafe import Markup
-
-from flask import Flask
+import requests
+from tenacity import retry, wait_random_exponential, stop_after_attempt
 
 app = Flask(__name__)
 
@@ -15,7 +14,7 @@ def redirector(substack_name: str, post_url_path: str):
     return render_template('empty.html', title=title, meta_tag_list=meta)
 
 @retry(wait=wait_random_exponential(min=1, max=40), stop=stop_after_attempt(3))
-def get_title_and_meta_tags(url: str):
+def get_title_and_meta_tags(url: str) -> Tuple[str, List[str]]:
     # Send a GET request to the URL
     response = requests.get(url)
     
