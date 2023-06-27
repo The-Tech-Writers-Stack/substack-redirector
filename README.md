@@ -25,6 +25,10 @@ flask --app run.py run
 
 ## Example Usage
 
+For instance if I want to use this for my substack post:
+[https://codeconfessions.substack.com/p/code-confessions-digest-3](https://codeconfessions.substack.com/p/code-confessions-digest-3)
+I will make the following request:
+
 ```shell
 ➜ curl http://localhost:5000/codeconfessions/code-confessions-digest-3
 ```
