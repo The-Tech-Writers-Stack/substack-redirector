@@ -11,23 +11,23 @@ app = Flask(__name__)
 def redirector(substack_name: str, post_url_path: str):
     substack_url = f'https://{substack_name}.substack.com/p/{post_url_path}'
     title, meta = get_title_and_meta_tags(substack_url)
-    return render_template('empty.html', title=title, meta_tag_list=meta)
+    return render_template('empty.html', title=title, meta_tag_list=meta, url=substack_url)
 
 @retry(wait=wait_random_exponential(min=1, max=40), stop=stop_after_attempt(3))
 def get_title_and_meta_tags(url: str) -> Tuple[str, List[str]]:
     # Send a GET request to the URL
     response = requests.get(url)
-    
+
     # Create a BeautifulSoup object to parse the HTML content
     soup = BeautifulSoup(response.content, 'html.parser')
-    
+
     # Find the title tag
     title_tag = soup.find('title')
-    
+
     # Find all meta tags within the page
     meta_tags = soup.find_all('meta')
     title_tag_safe = Markup(str(title_tag))
-    meta_tags_safe = [Markup(str(meta_tag)) for meta_tag in meta_tags]    
-    
+    meta_tags_safe = [Markup(str(meta_tag)) for meta_tag in meta_tags]
+
     # Return the title tag and meta tags
     return title_tag_safe, meta_tags_safe

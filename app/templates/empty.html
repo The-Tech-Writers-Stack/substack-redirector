@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    {{title}} {% for meta_tag in meta_tag_list %} {{meta_tag}} {%endfor%}
+    {{title}}
+    {% for meta_tag in meta_tag_list %}
+    {{meta_tag}}
+    {% endfor %}
+    <meta http-equiv="refresh" content="0; url={{ url }}"/>
   </head>
   <body></body>
 </html>
