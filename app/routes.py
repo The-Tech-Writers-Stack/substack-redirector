@@ -8,7 +8,7 @@ from tenacity import retry, wait_random_exponential, stop_after_attempt
 
 app = Flask(__name__)
 
-@app.route("/open/<string:substack_name>/<string:post_url_path>")
+@app.route("/<string:substack_name>/<string:post_url_path>")
 def redirector(substack_name: str, post_url_path: str):
     substack_url = f'https://{substack_name}.substack.com/p/{post_url_path}'
     title, meta = get_title_and_meta_tags(substack_url)
