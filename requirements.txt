@@ -3,3 +3,4 @@ requests
 tenacity
 beautifulsoup4
 pandas
+lxml

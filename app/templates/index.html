@@ -10,7 +10,7 @@
 </head>
 
 <body>
-    <div class="mx-auto max-w-3xl pt-10 px-5">
+    <div class="mx-auto max-w-4xl pt-10 px-5">
         <h1 class="text-3xl pb-4">The Tech Writers Stack</h1>
 
         <span>
@@ -20,7 +20,7 @@
         </span>
 
         <h2 class="text-2xl py-4">Directory</h2>
-        <ul class="pb-20">
+        <ul class="pb-8">
             {% for website in data %}
             <li class="pb-4 flex">
                 <img src="{{ website.url }}/favicon.ico" class="flex-none w-16 h-16 mr-4 rounded">
@@ -30,6 +30,18 @@
             </li>
             {% endfor %}
         </ul>
+
+        <h2 class="text-2xl py-4">Latest articles</h2>
+        <ul class="pb-20">
+            {% for article in latest %}
+            <li class="pb-4 flex">
+                <span class="flex-initial">
+                    <a class="font-bold text-blue-700 hover:text-blue-400" href="{{ article.link }}">{{ article.title }}</a>: {{ article.description }}
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
+
     </div>
 </body>
 
