@@ -70,6 +70,8 @@ def crawl_feeds(ttl=3600):
         response = requests.get(item['url'] + "/feed.rss")
         soup = BeautifulSoup(response.content, "xml")
 
+        image_url = soup.find('channel').find('image').find('url').text
+
         for item in soup.find_all('item'):
             title = item.find('title').text
             date = datetime.datetime.strptime(item.find('pubDate').text, format)
@@ -84,7 +86,7 @@ def crawl_feeds(ttl=3600):
                 name = name[8:]
                 link = "./%s/%s" % (name, slug)
 
-            feed.append(dict(title=title, date=date.strftime(format), description=description, link=link))
+            feed.append(dict(title=title, img=image_url, date=date.strftime(format), description=description, link=link))
 
     feed.sort(key=lambda d: d['date'], reverse=True)
 

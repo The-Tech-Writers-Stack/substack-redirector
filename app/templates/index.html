@@ -35,6 +35,7 @@
         <ul class="pb-20">
             {% for article in latest %}
             <li class="pb-4 flex">
+                <img src="{{ article.img }}" class="flex-none w-16 h-16 mr-4 rounded">
                 <span class="flex-initial">
                     <a class="font-bold text-blue-700 hover:text-blue-400" href="{{ article.link }}">{{ article.title }}</a>: {{ article.description }}
                 </span>
