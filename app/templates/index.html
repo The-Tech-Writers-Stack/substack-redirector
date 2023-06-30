@@ -13,7 +13,13 @@
     <div class="mx-auto max-w-3xl pt-10 px-5">
         <h1 class="text-3xl pb-4">The Tech Writers Stack</h1>
 
-        <h2 class="text-2xl pb-4">Directory</h2>
+        <span>
+            The Directory below is a list of several newsletters and blogs about different
+            technical topics. If you are a technical writer yourself
+            and want to get featured, <a class="font-bold text-blue-700 hover:text-blue-400" href="https://techwriters.info/techwriters/join">join our community</a> on Substack.
+        </span>
+
+        <h2 class="text-2xl py-4">Directory</h2>
         <ul>
             {% for website in data %}
             <li class="pb-2"><a class="font-bold text-blue-700 hover:text-blue-400" href="{{ website.url }}">{{ website.title }}</a>: {{ website.info }}</li>
