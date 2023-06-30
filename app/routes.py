@@ -6,13 +6,16 @@ import requests
 from .crawl import get_data
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 
+
 app = Flask(__name__)
+
 
 @app.route("/<string:substack_name>/<string:post_url_path>")
 def redirector(substack_name: str, post_url_path: str):
     substack_url = f'https://{substack_name}.substack.com/p/{post_url_path}'
     title, meta = get_title_and_meta_tags(substack_url)
     return render_template('empty.html', title=title, meta_tag_list=meta, url=substack_url)
+
 
 @retry(wait=wait_random_exponential(min=1, max=40), stop=stop_after_attempt(3))
 def get_title_and_meta_tags(url: str) -> Tuple[str, List[str]]:
@@ -32,6 +35,7 @@ def get_title_and_meta_tags(url: str) -> Tuple[str, List[str]]:
 
     # Return the title tag and meta tags
     return title_tag_safe, meta_tags_safe
+
 
 @app.route("/")
 def index():

@@ -6,6 +6,22 @@ import jinja2
 
 
 def get_data():
+    data = download_data()
+
+    websites = {}
+
+    for item in data.itertuples(index=False):
+        url = item[4]
+
+        if not url.startswith("https://"):
+            url = "https://" + url
+
+        websites[url] = item
+
+    return [dict(url=k, title=v[1], info=v[2]) for k,v in websites.items()]
+
+
+def download_data():
     filepath = Path(__file__).parent / "data.csv"
 
     if not filepath.exists() or time.time() - filepath.stat().st_mtime > 300:
@@ -21,16 +37,4 @@ def get_data():
         with open(filepath, "w") as fp:
             data.to_csv(fp)
 
-    data = pd.read_csv(filepath, index_col=0)
-
-    websites = {}
-
-    for item in data.itertuples(index=False):
-        url = item[4]
-
-        if not url.startswith("https://"):
-            url = "https://" + url
-
-        websites[url] = item
-
-    return [dict(url=k, title=v[1], info=v[2]) for k,v in websites.items()]
+    return pd.read_csv(filepath, index_col=0)
