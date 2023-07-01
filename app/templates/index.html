@@ -13,16 +13,22 @@
     <div class="mx-auto max-w-4xl pt-10 px-5">
         <h1 class="text-3xl pb-4">The Tech Writers Stack</h1>
 
+
+        <div class="mt-4">
+            <a class="mx-auto bg-green-800 hover:bg-green-700 text-green-200 px-4 py-2 rounded text-lg" href="https://techwriters.info/techwriters/join">Join The Tech Writers Stack</a>
+        </div>
+
+        <h2 class="text-2xl mb-4 mt-8">Directory</h2>
+
         <span>
             The Directory below is a list of several newsletters and blogs about different
             technical topics. If you are a technical writer yourself
-            and want to get featured, <a class="font-bold text-blue-700 hover:text-blue-400" href="https://techwriters.info/techwriters/join">join our community</a> on Substack.
+            and want to get featured, join our community on Substack.
         </span>
 
-        <h2 class="text-2xl py-8">Directory</h2>
-        <ul>
+        <ul class="mt-8">
             {% for website in data %}
-            <li class="pb-4 flex">
+            <li class="mb-4 flex">
                 <img src="{{ website.url }}/favicon.ico" class="flex-none w-16 h-16 mr-4 rounded">
                 <span class="flex-initial">
                     <a class="font-bold text-blue-700 hover:text-blue-400" href="{{ website.url }}">{{ website.title }}</a>: {{ website.info }}
