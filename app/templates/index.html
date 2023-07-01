@@ -19,8 +19,8 @@
             and want to get featured, <a class="font-bold text-blue-700 hover:text-blue-400" href="https://techwriters.info/techwriters/join">join our community</a> on Substack.
         </span>
 
-        <h2 class="text-2xl py-4">Directory</h2>
-        <ul class="pb-8">
+        <h2 class="text-2xl py-8">Directory</h2>
+        <ul>
             {% for website in data %}
             <li class="pb-4 flex">
                 <img src="{{ website.url }}/favicon.ico" class="flex-none w-16 h-16 mr-4 rounded">
@@ -31,7 +31,7 @@
             {% endfor %}
         </ul>
 
-        <h2 class="text-2xl py-4">Latest articles</h2>
+        <h2 class="text-2xl py-8">Latest articles</h2>
         <ul class="pb-20">
             {% for article in latest %}
             <li class="pb-4 flex">

@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from flask import Flask, render_template
 from markupsafe import Markup
 import requests
-from .crawl import get_data, crawl_feeds
+from .crawl import get_data, latest_articles
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 
 
@@ -40,6 +40,6 @@ def get_title_and_meta_tags(url: str) -> Tuple[str, List[str]]:
 @app.route("/")
 def index():
     data = get_data()
-    latest = crawl_feeds()
+    latest = latest_articles()
 
     return render_template('index.html', data=data, latest=latest)

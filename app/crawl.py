@@ -7,8 +7,17 @@ import requests
 import time
 
 
-def get_data(ttl=600):
-    data = download_data(ttl=ttl)
+def get_data():
+    filepath = Path(__file__).parent / "data.csv"
+
+    if not filepath.exists():
+        crawl()
+
+    return load_data(filepath)
+
+
+def load_data(filepath):
+    data =  pd.read_csv(filepath, index_col=0)
 
     websites = {}
 
@@ -23,52 +32,30 @@ def get_data(ttl=600):
     result = []
 
     for k,v in websites.items():
-        obj = dict(url=k, title=v[1], info=v[2], )
-        obj['feed'] = v[5] or k + "/feed"
+        obj = dict(url=k, title=v[1], info=v[2])
         result.append(obj)
 
     return result
 
 
-def download_data(ttl=600):
-    filepath = Path(__file__).parent / "data.csv"
+def latest_articles():
+    data = get_data()
 
-    if filepath.exists() and time.time() - filepath.stat().st_mtime < ttl:
-        return pd.read_csv(filepath, index_col=0)
-
-    print("Downloading registry...")
-
-    data = pd.read_csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vS6a7T0Lj4RctsmgCT-CJFKa_wMPe9Q7W_GxF9TmVqyfVDmXpZFmUh32LzMQV57C_ZbPDS6twBi2KbZ/pub?gid=138299737&single=true&output=csv',
-        # Set first column as rownames in data frame
-        index_col=0,
-        # Parse column values to datetime
-        parse_dates=['Timestamp']
-    ).fillna("")
-
-    with open(filepath, "w") as fp:
-        data.to_csv(fp)
-
-    return data
-
-
-def crawl_feeds(ttl=3600):
-    data = get_data(ttl)
-
-    filepath = Path(__file__).parent / "feed.json"
-
-    if filepath.exists() and time.time() - filepath.stat().st_mtime < ttl:
-        with open(filepath) as fp:
-            return json.load(fp)
-
-    print("Downloading feed...")
+    filepath = Path(__file__).parent / "feeds"
 
     feed = []
     format = "%a, %d %b %Y %H:%M:%S %Z"
     now = datetime.datetime.now()
 
-    for item in data:
-        response = requests.get(item['url'] + "/feed.rss")
-        soup = BeautifulSoup(response.content, "xml")
+    for website in data:
+        my_feed = []
+
+        feed_url = website['url'] + "/feed.rss"
+
+        with open(filepath / website['url'][8:].replace("/", ".")) as fp:
+            content = fp.read()
+
+        soup = BeautifulSoup(content, "xml")
 
         image_url = soup.find('channel').find('image').find('url').text
 
@@ -86,11 +73,55 @@ def crawl_feeds(ttl=3600):
                 name = name[8:]
                 link = "./%s/%s" % (name, slug)
 
-            feed.append(dict(title=title, img=image_url, date=date.strftime(format), description=description, link=link))
+            my_feed.append(dict(title=title, img=image_url, date=date, description=description, link=link))
+
+        my_feed.sort(key=lambda item: item['date'], reverse=True)
+        feed.extend(my_feed[:3])
 
     feed.sort(key=lambda d: d['date'], reverse=True)
 
-    with open(filepath, "w") as fp:
-        json.dump(feed, fp, indent=2)
+    for item in feed:
+        item['date'] = item['date'].strftime(format)
 
     return feed
+
+
+def crawl():
+    print("Downloading registry...")
+
+    filepath = Path(__file__).parent / "data.csv"
+
+    data = pd.read_csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vS6a7T0Lj4RctsmgCT-CJFKa_wMPe9Q7W_GxF9TmVqyfVDmXpZFmUh32LzMQV57C_ZbPDS6twBi2KbZ/pub?gid=138299737&single=true&output=csv',
+        # Set first column as rownames in data frame
+        index_col=0,
+        # Parse column values to datetime
+        parse_dates=['Timestamp']
+    ).fillna("")
+
+    with open(filepath, "w") as fp:
+        data.to_csv(fp)
+
+    data = load_data(filepath)
+
+    filepath = Path(__file__).parent / "feeds"
+
+    print("Downloading feeds...")
+
+    for website in data:
+        feed_url = website['url'] + "/feed.rss"
+        print("-", feed_url)
+        response = requests.get(feed_url)
+
+        with open(filepath / website['url'][8:].replace("/", "."), "w") as fp:
+            fp.write(response.text)
+
+
+if __name__ == "__main__":
+    import sys
+    import time
+
+    timeout = int(sys.argv[1])
+
+    while True:
+        crawl()
+        time.sleep(timeout)

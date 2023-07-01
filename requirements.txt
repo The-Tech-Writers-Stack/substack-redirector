@@ -4,3 +4,4 @@ tenacity
 beautifulsoup4
 pandas
 lxml
+Flask-Caching
