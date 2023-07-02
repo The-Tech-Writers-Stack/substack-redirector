@@ -17,7 +17,7 @@ def get_data():
 
 
 def load_data(filepath):
-    data =  pd.read_csv(filepath, index_col=0, parse_dates=["Timestamp"])
+    data = pd.read_csv(filepath, index_col=0, parse_dates=["Timestamp"])
 
     websites = {}
 
@@ -41,7 +41,26 @@ def load_data(filepath):
             substack = url[25:]
             image_url = f"https://{substack}.substack.com/favicon.ico"
 
-        obj = dict(url=url, title=row[2].strip(), info=row[3].strip(), date=row[0], image_url=image_url)
+        topics = row[12]
+
+        if isinstance(topics, str):
+            topics = topics.replace(",", ";")
+
+            if "Literature; art; and media" in topics:
+                topics = topics.replace("Literature; art; and media", "Literature, art, and media")
+
+            topics = [s.strip() for s in topics.split(";")]
+        else:
+            topics = []
+
+        obj = dict(
+            url=url,
+            title=row[2].strip(),
+            info=row[3].strip(),
+            date=row[0],
+            image_url=image_url,
+            topics=topics,
+        )
         result.append(obj)
 
     return result
@@ -59,18 +78,18 @@ def latest_articles(max_per_author=0, max_words=0):
     for website in data:
         my_feed = []
 
-        with open(filepath / website['url'][8:].replace("/", ".")) as fp:
+        with open(filepath / website["url"][8:].replace("/", ".")) as fp:
             content = fp.read()
 
         soup = BeautifulSoup(content, "xml")
 
-        image_url = soup.find('channel').find('image').find('url').text
+        image_url = soup.find("channel").find("image").find("url").text
 
-        for item in soup.find_all('item'):
-            title = item.find('title').text
-            date = datetime.datetime.strptime(item.find('pubDate').text, format)
-            description = item.find('description').text
-            link = item.find('link').text
+        for item in soup.find_all("item"):
+            title = item.find("title").text
+            date = datetime.datetime.strptime(item.find("pubDate").text, format)
+            description = item.find("description").text
+            link = item.find("link").text
 
             if max_words > 0:
                 description = description.split()
@@ -88,26 +107,36 @@ def latest_articles(max_per_author=0, max_words=0):
                 name = name[8:]
                 link = "./%s/%s" % (name, slug)
 
-            my_feed.append(dict(title=title.strip(), author=website['title'], url=website['url'], img=image_url, date=date, description=description.strip(), link=link))
+            my_feed.append(
+                dict(
+                    title=title.strip(),
+                    author=website["title"],
+                    url=website["url"],
+                    img=image_url,
+                    date=date,
+                    description=description.strip(),
+                    link=link,
+                )
+            )
 
-        my_feed.sort(key=lambda item: item['date'], reverse=True)
+        my_feed.sort(key=lambda item: item["date"], reverse=True)
 
         if max_per_author > 0:
             my_feed = my_feed[:max_per_author]
 
         feed.extend(my_feed)
 
-    feed.sort(key=lambda d: d['date'], reverse=True)
+    feed.sort(key=lambda d: d["date"], reverse=True)
 
     for item in feed:
-        item['date'] = item['date'].strftime(format)
+        item["date"] = item["date"].strftime(format)
 
     return feed
 
 
 def new_members(data):
     today = datetime.datetime.today()
-    return [w for w in data if (today - w['date']).days <= 7]
+    return [w for w in data if (today - w["date"]).days <= 7]
 
 
 def crawl():
@@ -115,11 +144,12 @@ def crawl():
 
     filepath = Path(__file__).parent / "data.csv"
 
-    data = pd.read_csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vS6a7T0Lj4RctsmgCT-CJFKa_wMPe9Q7W_GxF9TmVqyfVDmXpZFmUh32LzMQV57C_ZbPDS6twBi2KbZ/pub?gid=138299737&single=true&output=csv',
+    data = pd.read_csv(
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vS6a7T0Lj4RctsmgCT-CJFKa_wMPe9Q7W_GxF9TmVqyfVDmXpZFmUh32LzMQV57C_ZbPDS6twBi2KbZ/pub?gid=138299737&single=true&output=csv",
         # Set first column as rownames in data frame
         index_col=0,
         # Parse column values to datetime
-        parse_dates=['Timestamp']
+        parse_dates=["Timestamp"],
     ).fillna("")
 
     with open(filepath, "w") as fp:
@@ -132,7 +162,7 @@ def crawl():
     print("Downloading feeds...")
 
     for website in data:
-        feed_url = website['url'] + "/feed.rss"
+        feed_url = website["url"] + "/feed.rss"
 
         if feed_url.startswith("https://techwriters.info/"):
             substack = feed_url[25:-9]
@@ -141,7 +171,7 @@ def crawl():
         print("-", feed_url)
         response = requests.get(feed_url, allow_redirects=True)
 
-        with open(filepath / website['url'][8:].replace("/", "."), "w") as fp:
+        with open(filepath / website["url"][8:].replace("/", "."), "w") as fp:
             fp.write(response.text)
 
 

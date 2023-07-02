@@ -20,19 +20,35 @@
 
         <h2 class="text-2xl mb-4 mt-8">Directory</h2>
 
-        <span>
+        <div>
             The Directory below is a list of several newsletters and blogs about different
             technical topics. If you are a technical writer yourself
             and want to get featured, join our community on Substack.
-        </span>
+        </div>
+
+        {% if filters %}
+        <div class="mt-2">
+            <a class="mx-auto bg-green-200 hover:bg-green-300 text-green-800 px-2 py-1 text-sm rounded" href="/">❎ {{ filters }}</a>
+        </div>
+        {% endif %}
 
         <ul class="mt-8">
             {% for website in data %}
-            <li class="mb-4 flex">
+            <li class="mb-6 flex">
                 <img src="{{ website.image_url }}" class="flex-none w-16 h-16 mr-4 rounded">
-                <span class="flex-initial">
-                    <a class="font-bold text-blue-700 hover:text-blue-500" href="{{ website.url }}">{{ website.title }}</a>: {{ website.info }}
-                </span>
+                <div class="flex-initial">
+                    <div>
+                        <a class="font-bold text-lg text-green-900 hover:text-green-700" href="{{ website.url }}">{{ website.title }}</a>
+                    </div>
+                    <div class="text-gray-800 my-2">
+                        {{ website.info }}
+                    </div>
+                    <div>
+                        {% for topic in website.topics %}
+                        <a href="?filter={{ topic }}" class="text-green-900 bg-green-200 px-2 py-1 my-4 text-sm rounded">{{ topic }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
             </li>
             {% endfor %}
         </ul>
@@ -43,9 +59,9 @@
             <li class="pb-4 flex">
                 <img src="{{ article.img }}" class="flex-none w-16 h-16 mr-4 rounded">
                 <span class="flex-initial">
-                    <a class="font-bold text-blue-700 hover:text-blue-500" href="{{ article.link }}">{{ article.title }}</a>
+                    <a class="font-bold text-green-800 hover:text-green-700" href="{{ article.link }}">{{ article.title }}</a>
                     - {{ article.description }}
-                    - <a href="article.site_url" class="text-blue-700 hover:text-blue-500">{{ article.author }}</a>.
+                    - <a href="article.site_url" class="text-green-800 hover:text-green-700">{{ article.author }}</a>.
                 </span>
             </li>
             {% endfor %}

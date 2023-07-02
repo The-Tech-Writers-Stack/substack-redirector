@@ -1,6 +1,6 @@
 from typing import Tuple, List
 from bs4 import BeautifulSoup
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, request
 from markupsafe import Markup
 import requests
 import collections
@@ -47,14 +47,21 @@ def get_title_and_meta_tags(url: str) -> Tuple[str, List[str]]:
 
 @app.route("/")
 def index():
+    filters = request.args.get('filter')
+
     data = get_data()
     latest = latest_articles(3, 30)
 
-    return render_template('index.html', data=data, latest=latest)
+    if filters:
+        print(filters, flush=True)
+        data = [website for website in data if filters in set(website['topics'])]
+
+    return render_template('index.html', data=data, latest=latest, filters=filters)
 
 
 @app.route("/admin")
 def admin():
+
     data = get_data()
     new = new_members(data)
     latest = latest_articles()
