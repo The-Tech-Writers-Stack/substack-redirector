@@ -29,9 +29,9 @@
         <ul class="mt-8">
             {% for website in data %}
             <li class="mb-4 flex">
-                <img src="{{ website.url }}/favicon.ico" class="flex-none w-16 h-16 mr-4 rounded">
+                <img src="{{ website.image_url }}" class="flex-none w-16 h-16 mr-4 rounded">
                 <span class="flex-initial">
-                    <a class="font-bold text-blue-700 hover:text-blue-400" href="{{ website.url }}">{{ website.title }}</a>: {{ website.info }}
+                    <a class="font-bold text-blue-700 hover:text-blue-500" href="{{ website.url }}">{{ website.title }}</a>: {{ website.info }}
                 </span>
             </li>
             {% endfor %}
@@ -43,7 +43,9 @@
             <li class="pb-4 flex">
                 <img src="{{ article.img }}" class="flex-none w-16 h-16 mr-4 rounded">
                 <span class="flex-initial">
-                    <a class="font-bold text-blue-700 hover:text-blue-400" href="{{ article.link }}">{{ article.title }}</a>: {{ article.description }}
+                    <a class="font-bold text-blue-700 hover:text-blue-500" href="{{ article.link }}">{{ article.title }}</a>
+                    - {{ article.description }}
+                    - <a href="article.site_url" class="text-blue-700 hover:text-blue-500">{{ article.author }}</a>.
                 </span>
             </li>
             {% endfor %}

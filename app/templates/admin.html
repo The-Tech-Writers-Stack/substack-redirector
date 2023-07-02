@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | The Tech Writers Stack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+    <div class="mx-auto max-w-4xl pt-10 px-5">
+        <h2 class="text-2xl mb-4 mt-8">Last week members</h2>
+
+        <ul class="mt-8">
+            {% for website in new_members %}
+            <li class="mb-4">
+                <span class="flex-initial">
+                    <a class="font-bold" href="{{ website.url }}">{{ website.title }}</a>: {{ website.info }}
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <h2 class="text-2xl mb-4 mt-8">Last week articles</h2>
+
+        <ul class="mt-8">
+            {% for (author, site_url), articles in latest.items() %}
+            <li class="mb-4">
+                <span class="flex-initial">
+                    {% if articles.__len__() > 1 %}
+                    <a class="font-bold" href="{{ site_url }}">{{ author }}</a> published {{ articles|length }} articles:
+                    <ul>
+                        {% for article in articles %}
+                        <li>
+                            - <a href="{{ article.link }}">{{ article.title }}</a>.
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <a class="font-bold" href="{{ site_url }}">{{ author }}</a> published <a href="{{ articles[0].link }}">{{ articles[0].title }}</a>.
+                    {% endif %}
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+
+</html>

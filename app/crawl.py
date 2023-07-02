@@ -17,28 +17,37 @@ def get_data():
 
 
 def load_data(filepath):
-    data =  pd.read_csv(filepath, index_col=0)
+    data =  pd.read_csv(filepath, index_col=0, parse_dates=["Timestamp"])
 
     websites = {}
 
-    for item in data.itertuples(index=False):
-        url = item[4]
+    for item in data.itertuples(index=True):
+        url = item[5]
 
         if not url.startswith("https://"):
             url = "https://" + url
+
+        if url.endswith(".substack.com"):
+            url = f"https://techwriters.info/{url[8:-13]}"
 
         websites[url] = item
 
     result = []
 
-    for k,v in websites.items():
-        obj = dict(url=k, title=v[1], info=v[2])
+    for url, row in websites.items():
+        image_url = url + "/favicon.ico"
+
+        if url.startswith("https://techwriters.info/"):
+            substack = url[25:]
+            image_url = f"https://{substack}.substack.com/favicon.ico"
+
+        obj = dict(url=url, title=row[2].strip(), info=row[3].strip(), date=row[0], image_url=image_url)
         result.append(obj)
 
     return result
 
 
-def latest_articles():
+def latest_articles(max_per_author=0, max_words=0):
     data = get_data()
 
     filepath = Path(__file__).parent / "feeds"
@@ -49,8 +58,6 @@ def latest_articles():
 
     for website in data:
         my_feed = []
-
-        feed_url = website['url'] + "/feed.rss"
 
         with open(filepath / website['url'][8:].replace("/", ".")) as fp:
             content = fp.read()
@@ -65,6 +72,14 @@ def latest_articles():
             description = item.find('description').text
             link = item.find('link').text
 
+            if max_words > 0:
+                description = description.split()
+
+                if len(description) > max_words:
+                    description = " ".join(description[:max_words]) + "..."
+                else:
+                    description = " ".join(description)
+
             if (now - date).days > 7:
                 continue
 
@@ -73,10 +88,14 @@ def latest_articles():
                 name = name[8:]
                 link = "./%s/%s" % (name, slug)
 
-            my_feed.append(dict(title=title, img=image_url, date=date, description=description, link=link))
+            my_feed.append(dict(title=title.strip(), author=website['title'], url=website['url'], img=image_url, date=date, description=description.strip(), link=link))
 
         my_feed.sort(key=lambda item: item['date'], reverse=True)
-        feed.extend(my_feed[:3])
+
+        if max_per_author > 0:
+            my_feed = my_feed[:max_per_author]
+
+        feed.extend(my_feed)
 
     feed.sort(key=lambda d: d['date'], reverse=True)
 
@@ -84,6 +103,11 @@ def latest_articles():
         item['date'] = item['date'].strftime(format)
 
     return feed
+
+
+def new_members(data):
+    today = datetime.datetime.today()
+    return [w for w in data if (today - w['date']).days <= 7]
 
 
 def crawl():
@@ -109,8 +133,13 @@ def crawl():
 
     for website in data:
         feed_url = website['url'] + "/feed.rss"
+
+        if feed_url.startswith("https://techwriters.info/"):
+            substack = feed_url[25:-9]
+            feed_url = f"http://{substack}.substack.com/feed.rss"
+
         print("-", feed_url)
-        response = requests.get(feed_url)
+        response = requests.get(feed_url, allow_redirects=True)
 
         with open(filepath / website['url'][8:].replace("/", "."), "w") as fp:
             fp.write(response.text)
