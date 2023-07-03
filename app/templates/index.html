@@ -40,12 +40,19 @@
                     <div>
                         <a class="font-bold text-lg text-green-900 hover:text-green-700" href="{{ website.url }}">{{ website.title }}</a>
                     </div>
+                    <div>
+                        {% if website.clicks > 0 %}
+                        <span>👀 {{ website.clicks }}</span>
+                        {% endif %}
+                    </div>
                     <div class="text-gray-800 my-2">
                         {{ website.info }}
                     </div>
                     <div>
                         {% for topic in website.topics %}
-                        <a href="?filter={{ topic }}" class="text-green-900 bg-green-200 px-2 py-1 my-4 text-sm rounded">{{ topic }}</a>
+                        <div class="inline">
+                            <a href="?filter={{ topic }}" class="text-green-900 bg-green-200 px-2 py-1 my-4 text-sm rounded">{{ topic }}</a>
+                        </div>
                         {% endfor %}
                     </div>
                 </div>

@@ -5,6 +5,7 @@ import pandas as pd
 from pathlib import Path
 import requests
 import time
+import shelve
 
 
 def get_data():
@@ -34,12 +35,16 @@ def load_data(filepath):
 
     result = []
 
+    db = shelve.open("clicks.db", flag="c")
+
     for url, row in websites.items():
         image_url = url + "/favicon.ico"
+        clicks = 0
 
         if url.startswith("https://techwriters.info/"):
             substack = url[25:]
             image_url = f"https://{substack}.substack.com/favicon.ico"
+            clicks = db.get(substack, 0)
 
         topics = row[12]
 
@@ -60,6 +65,7 @@ def load_data(filepath):
             date=row[0],
             image_url=image_url,
             topics=topics,
+            clicks=clicks
         )
         result.append(obj)
 

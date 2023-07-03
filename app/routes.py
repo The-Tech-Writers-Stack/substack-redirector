@@ -1,18 +1,30 @@
+from pathlib import Path
 from typing import Tuple, List
 from bs4 import BeautifulSoup
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 from markupsafe import Markup
 import requests
 import collections
 from .crawl import get_data, latest_articles, new_members
 from tenacity import retry, wait_random_exponential, stop_after_attempt
+import shelve
 
 
 app = Flask(__name__)
 
 
+@app.route("/favicon.ico")
+def favicon():
+    return send_file(Path(__file__).parent / "favicon.ico")
+
+
 @app.route("/<string:substack_name>/<string:post_url_path>")
 def redirect_post(substack_name: str, post_url_path: str):
+    with shelve.open("clicks.db", flag="c") as db:
+        key = f"{substack_name}/{post_url_path}"
+        db[key] = db.get(key, 0) + 1
+        db[substack_name] = db.get(substack_name, 0) + 1
+
     substack_url = f'https://{substack_name}.substack.com/p/{post_url_path}'
     title, meta = get_title_and_meta_tags(substack_url)
     return render_template('empty.html', title=title, meta_tag_list=meta, url=substack_url)
@@ -20,6 +32,9 @@ def redirect_post(substack_name: str, post_url_path: str):
 
 @app.route("/<string:substack_name>")
 def redirect_substack(substack_name: str):
+    with shelve.open("clicks.db", flag="c") as db:
+        db[substack_name] = db.get(substack_name, 0) + 1
+
     substack_url = f'https://{substack_name}.substack.com'
     title, meta = get_title_and_meta_tags(substack_url)
     return render_template('empty.html', title=title, meta_tag_list=meta, url=substack_url)
