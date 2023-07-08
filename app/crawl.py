@@ -89,7 +89,10 @@ def latest_articles(max_per_author=0, max_words=0):
 
         soup = BeautifulSoup(content, "xml")
 
-        image_url = soup.find("channel").find("image").find("url").text
+        try:
+            image_url = soup.find("channel").find("image").find("url").text
+        except AttributeError:
+            continue
 
         for item in soup.find_all("item"):
             title = item.find("title").text
@@ -189,4 +192,8 @@ if __name__ == "__main__":
 
     while True:
         crawl()
+
+        if timeout == 0:
+            break
+
         time.sleep(timeout)
