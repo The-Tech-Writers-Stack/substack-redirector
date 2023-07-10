@@ -91,42 +91,43 @@ def latest_articles(max_per_author=0, max_words=0):
 
         try:
             image_url = soup.find("channel").find("image").find("url").text
+
+            for item in soup.find_all("item"):
+                title = item.find("title").text
+                date = datetime.datetime.strptime(item.find("pubDate").text, format)
+                description = item.find("description").text
+                link = item.find("link").text
+
+                if max_words > 0:
+                    description = description.split()
+
+                    if len(description) > max_words:
+                        description = " ".join(description[:max_words]) + "..."
+                    else:
+                        description = " ".join(description)
+
+                if (now - date).days > 7:
+                    continue
+
+                if ".substack.com/p/" in link:
+                    name, slug = link.split(".substack.com/p/")
+                    name = name[8:]
+                    link = "./%s/%s" % (name, slug)
+
+                my_feed.append(
+                    dict(
+                        title=title.strip(),
+                        author=website["title"],
+                        url=website["url"],
+                        img=image_url,
+                        date=date,
+                        description=description.strip(),
+                        link=link,
+                    )
+                )
+
         except AttributeError:
             continue
-
-        for item in soup.find_all("item"):
-            title = item.find("title").text
-            date = datetime.datetime.strptime(item.find("pubDate").text, format)
-            description = item.find("description").text
-            link = item.find("link").text
-
-            if max_words > 0:
-                description = description.split()
-
-                if len(description) > max_words:
-                    description = " ".join(description[:max_words]) + "..."
-                else:
-                    description = " ".join(description)
-
-            if (now - date).days > 7:
-                continue
-
-            if ".substack.com/p/" in link:
-                name, slug = link.split(".substack.com/p/")
-                name = name[8:]
-                link = "./%s/%s" % (name, slug)
-
-            my_feed.append(
-                dict(
-                    title=title.strip(),
-                    author=website["title"],
-                    url=website["url"],
-                    img=image_url,
-                    date=date,
-                    description=description.strip(),
-                    link=link,
-                )
-            )
 
         my_feed.sort(key=lambda item: item["date"], reverse=True)
 
